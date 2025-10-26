@@ -1,6 +1,7 @@
 ```
 __pycache__/
 venv/
+.venv/
 .env
 .pytest_cache/
 .vscode/
@@ -9,4 +10,5 @@ build/
 .idea/
 *.egg-info/
 .coverage
+htmlcov/
 ```
