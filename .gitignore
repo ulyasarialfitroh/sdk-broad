@@ -1,3 +1,10 @@
-{
-  "updated_content": "__pycache__/\nvenv/\n.env\n.pytest_cache/\n.vscode/\ndist/"
-}
+```
+__pycache__/
+venv/
+.env
+.pytest_cache/
+.vscode/
+dist/
+build/
+.idea/
+```
