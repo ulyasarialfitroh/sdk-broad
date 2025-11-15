@@ -2,7 +2,7 @@
 
 This repository contains a Python-based simulation of a critical component in a cross-chain bridge system: an event listener (also known as an oracle or relayer). This application is designed to monitor a smart contract on a source blockchain (EVM-compatible), detect specific events, and relay the event data to a destination chain's API endpoint.
 
-This is an architectural prototype intended to demonstrate a robust, modular, and fault-tolerant design for real-world decentralized applications.
+This architectural prototype is intended to demonstrate a robust, modular, and fault-tolerant design for real-world decentralized applications.
 
 ## Concept
 
@@ -16,7 +16,7 @@ This application simulates the **second step** of this process. It listens for `
 
 ### Example Event
 
-The listener is configured to scan for a specific event signature in the bridge contract. For example:
+The listener is configured to scan for a specific event signature on the bridge contract. For example:
 
 ```solidity
 // Example Solidity event the listener is designed to detect
@@ -28,17 +28,17 @@ event TokensLocked(
 );
 ```
 
-## Code Architecture
+## Architecture
 
 The application is designed with a clear separation of concerns, dividing the logic into several distinct classes:
 
 -   `Config`
     -   **Responsibility**: Manages all configuration parameters for the application.
-    -   **Details**: It loads settings from environment variables (`.env` file) for better security and deployment flexibility. It also validates that essential parameters like RPC URLs and contract addresses are correctly set before the application starts.
+    -   **Details**: It loads settings from environment variables (`.env` file) for better security and deployment flexibility. It also validates that essential parameters like RPC URLs and contract addresses are present and correctly formatted before the application starts.
 
 -   `BlockchainConnector`
     -   **Responsibility**: Handles all direct communication with the source blockchain's RPC node.
-    -   **Details**: It wraps the `web3.py` library to manage the connection. This class is responsible for establishing and verifying the connection, fetching contract instances, and querying for blockchain data like the latest block number.
+    -   **Details**: It wraps the `web3.py` library to manage the connection. This class is responsible for establishing and verifying the connection, creating a contract instance, and querying for blockchain data like the latest block number.
 
 -   `EventScanner`
     -   **Responsibility**: The core logic for scanning the blockchain for relevant events.
@@ -61,7 +61,7 @@ The application operates in a continuous loop, performing the following steps:
 3.  **Fetch Logs**: It uses `web3.py` to query the RPC node for event logs matching the `TokensLocked` event signature from the specified bridge contract within the calculated block range.
 4.  **Process Events**: If any events are found, the `BridgeOrchestrator` iterates through them.
 5.  **Prevent Duplicates**: It checks a local cache (`processed_txs`) to ensure the event's transaction hash has not already been processed, preventing duplicate relays.
-6.  **Relay Data**: For each new, valid event, it invokes the `CrossChainRelayer`. The relayer formats the event data into a JSON payload and sends it to the configured destination API endpoint.
+6.  **Relay Data**: For each new, valid event, the orchestrator invokes the `CrossChainRelayer`. The relayer formats the event data into a JSON payload and sends it to the configured destination API endpoint.
 7.  **Handle Relay Failure**: If the API call fails, the error is logged. The event is *not* marked as processed, ensuring that the system will automatically retry relaying it in the next scan cycle.
 8.  **Update State**: After a block range is scanned successfully (regardless of whether events were found), the `EventScanner` updates its `last_scanned_block` state.
 9.  **Wait**: The orchestrator pauses for a configured interval (`POLL_INTERVAL_SECONDS`) before starting the next cycle.
@@ -91,36 +91,35 @@ pip install -r requirements.txt
 
 ### 3. Configuration
 
-Create a `.env` file in the root of the project directory. This file will store your sensitive configuration.
+Create a `.env` file in the root of the project directory. This file will store your configuration and sensitive credentials.
 
 ```ini
-# .env file
+# .env example file
 
-# RPC URL for the source blockchain (e.g., Ethereum, Sepolia Testnet)
+# RPC URL for the source EVM-compatible blockchain (e.g., Ethereum Sepolia)
 SOURCE_RPC_URL="https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID"
 
-# Address of the bridge smart contract to monitor
+# The address of the bridge smart contract to monitor
 BRIDGE_CONTRACT_ADDRESS="0x1234567890123456789012345678901234567890"
 
-# The block number to start scanning from. Use `0` to scan the entire chain history.
+# Block number to start scanning from. Use a recent block for faster startup, or 0 for the entire history.
 START_BLOCK="1000000"
 
-# (Optional) The API endpoint for the destination chain relayer.
-# Required only if you want to test the full relaying feature.
-# DESTINATION_API_ENDPOINT="https://api.mock-destination-chain.com/submit"
+# (Optional) The API endpoint of the destination chain to relay events to.
+DESTINATION_API_ENDPOINT="https://api.mock-destination-chain.com/submit"
 
-# (Optional) API key for the destination endpoint
-# API_KEY="your-secret-api-key"
+# (Optional) API key for authenticating with the destination endpoint.
+API_KEY="your-secret-api-key"
 ```
 
 Replace the placeholder values with your actual data.
 
 ### 4. Running the Application
 
-Execute the script from your terminal:
+Execute the main script from your terminal (assuming your main script is named `main.py`):
 
 ```bash
-python script.py
+python main.py
 ```
 
 The listener will start, and you will see log output in your console similar to this:
