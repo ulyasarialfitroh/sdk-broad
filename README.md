@@ -1,8 +1,8 @@
 # sdk-broad: A Python Simulation of a Cross-Chain Bridge Event Listener
 
-This repository contains a Python-based simulation of a critical component in a cross-chain bridge system: an event listener (also known as an oracle or relayer). This application is designed to monitor a smart contract on a source blockchain (EVM-compatible), detect specific events, and relay the event data to a destination chain's API endpoint.
+This repository contains a Python-based simulation of a critical component in a cross-chain bridge system: an event listener (also known as an oracle or relayer). This application is designed to monitor a smart contract on a source blockchain (EVM-compatible), detect specific events, and relay that data to a destination chain's API endpoint.
 
-This architectural prototype is intended to demonstrate a robust, modular, and fault-tolerant design for real-world decentralized applications.
+This project serves as an architectural prototype to demonstrate a robust, modular, and fault-tolerant design suitable for real-world decentralized applications.
 
 ## Concept
 
@@ -16,7 +16,7 @@ This application simulates the **second step** of this process. It listens for `
 
 ### Example Event
 
-The listener is configured to scan for a specific event signature on the bridge contract. For example:
+The listener is configured to scan for events with a specific signature on the bridge contract. For example:
 
 ```solidity
 // Example Solidity event the listener is designed to detect
@@ -114,9 +114,33 @@ API_KEY="your-secret-api-key"
 
 Replace the placeholder values with your actual data.
 
-### 4. Running the Application
+### 4. Running the Listener
 
-Execute the main script from your terminal (assuming your main script is named `main.py`):
+Create a main execution script, for example `main.py`, to initialize and run the `BridgeOrchestrator`.
+
+```python
+# main.py
+import logging
+from orchestrator import BridgeOrchestrator # Assuming your orchestrator is in 'orchestrator.py'
+
+# Configure basic logging to see the output
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - [%(levelname)s] - (%(module)s) - %(message)s'
+)
+
+if __name__ == "__main__":
+    try:
+        orchestrator = BridgeOrchestrator()
+        orchestrator.run()
+    except KeyboardInterrupt:
+        logging.info("Shutting down gracefully...")
+    except Exception as e:
+        logging.critical(f"An unexpected error occurred: {e}", exc_info=True)
+
+```
+
+Execute the script from your terminal:
 
 ```bash
 python main.py
